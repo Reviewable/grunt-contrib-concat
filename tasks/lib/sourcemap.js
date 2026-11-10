@@ -166,7 +166,7 @@ exports.init = function(grunt) {
       var initCol = this.column;
       sourceMapConsumer.eachMapping(function(args){
         var source;
-        if (args.source) {
+        if (args.source && args.originalLine !== null) {
           source = path.join(sourcePathToSourceMapPath, args.source).replace(/\\/g, '/');
         } else {
           source = null;
