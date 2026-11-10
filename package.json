@@ -1,7 +1,7 @@
 {
   "name": "grunt-contrib-concat",
   "description": "Concatenate files.",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "author": {
     "name": "Grunt Team",
     "url": "http://gruntjs.com/"
@@ -9,22 +9,22 @@
   "repository": "gruntjs/grunt-contrib-concat",
   "license": "MIT",
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=22.20.0"
   },
   "main": "tasks/concat.js",
   "scripts": {
     "test": "grunt test"
   },
   "dependencies": {
-    "chalk": "^1.0.0",
-    "source-map": "^0.6.1"
+    "chalk": "^6.0.1",
+    "source-map": "^0.8.0"
   },
   "devDependencies": {
     "grunt": "^1.0.0",
     "grunt-contrib-clean": "^2.0.1",
-    "grunt-contrib-internal": "^1.1.0",
+    "grunt-contrib-internal": "^9.1.0",
     "grunt-contrib-jshint": "^3.2.0",
-    "grunt-contrib-nodeunit": "^3.0.0"
+    "grunt-contrib-nodeunit": "^5.0.0"
   },
   "peerDependencies": {
     "grunt": ">=0.4.0"
@@ -34,6 +34,5 @@
   ],
   "files": [
     "tasks"
-  ],
-  "appveyor_id": "l42173901ms416km"
+  ]
 }

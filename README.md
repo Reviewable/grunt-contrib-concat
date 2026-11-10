@@ -1,10 +1,12 @@
-# grunt-contrib-concat v1.0.1 [![Build Status: Linux](https://travis-ci.org/gruntjs/grunt-contrib-concat.svg?branch=master)](https://travis-ci.org/gruntjs/grunt-contrib-concat) [![Build Status: Windows](https://ci.appveyor.com/api/projects/status/l42173901ms416km/branch/master?svg=true)](https://ci.appveyor.com/project/gruntjs/grunt-contrib-concat/branch/master)
+# grunt-contrib-concat
 
 > Concatenate files.
 
 
 
 ## Getting Started
+
+This plugin requires Node.js 22.20.0 or newer.
 
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
