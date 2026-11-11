@@ -15,7 +15,7 @@ exports.init = function(grunt) {
   var path = require('path');
 
   // Third party libs
-  var chalk = require('chalk');
+  var chalk = require('chalk').default;
   var SourceMap = require('source-map');
   var SourceMapConsumer = SourceMap.SourceMapConsumer;
   var SourceMapGenerator = SourceMap.SourceMapGenerator;
@@ -135,7 +135,7 @@ exports.init = function(grunt) {
 
   // Add the lines of a given file to the sourcemap. If in the file, store a
   // prior sourcemap and return src with sourceMappingURL removed.
-  SourceMapConcatHelper.prototype.addlines = function(src, filename) {
+  SourceMapConcatHelper.prototype.addlines = async function(src, filename) {
     var sourceMapRegEx = /\n\/[*/][@#]\s+sourceMappingURL=((?:(?!\s+\*\/).)*).*/;
     var relativeFilename = path.relative(path.dirname(this.dest), filename);
     // sourceMap path references are URLs, so ensure forward slashes are used for paths passed to sourcemap library
@@ -149,7 +149,7 @@ exports.init = function(grunt) {
       if (/data:application\/json;(charset[:=]utf-8;)?base64,([^\s]+)/.test(sourceMapFile)) {
         // Set sourceMapPath to the file that the map is inlined.
         sourceMapPath = filename;
-        sourceContent = new Buffer(RegExp.$2, 'base64').toString();
+        sourceContent = Buffer.from(RegExp.$2, 'base64').toString();
       } else {
         // If sourceMapPath is relative, expand relative to the file
         // referring to it.
@@ -158,15 +158,14 @@ exports.init = function(grunt) {
       }
       var sourceMapDir = path.dirname(sourceMapPath);
       var sourceMap = JSON.parse(sourceContent);
-      var sourceMapConsumer = new SourceMapConsumer(sourceMap);
       // Consider the relative path from source files to new sourcemap.
       var sourcePathToSourceMapPath = path.relative(path.dirname(this.dest), sourceMapDir);
       // Transfer the existing mappings into this mapping
       var initLine = this.line;
       var initCol = this.column;
-      sourceMapConsumer.eachMapping(function(args){
+      await SourceMapConsumer.with(sourceMap, null, consumer => consumer.eachMapping(args => {
         var source;
-        if (args.source) {
+        if (args.source && args.originalLine !== null) {
           source = path.join(sourcePathToSourceMapPath, args.source).replace(/\\/g, '/');
         } else {
           source = null;
@@ -185,7 +184,7 @@ exports.init = function(grunt) {
           source,
           args.name
         );
-      }, this);
+      }));
       if (sourceMap.sources && sourceMap.sources.length && sourceMap.sourcesContent) {
         for (var i = 0; i < sourceMap.sources.length; ++i) {
           this.generator.setSourceContent(
@@ -214,7 +213,7 @@ exports.init = function(grunt) {
     // Create the map filepath. Either datauri or destination path.
     var mapfilepath;
     if (this.options.sourceMapStyle === 'inline') {
-      var inlineMap = new Buffer(this._write()).toString('base64');
+      var inlineMap = Buffer.from(this._write()).toString('base64');
       mapfilepath = 'data:application/json;base64,' + inlineMap;
     } else {
       // Compute relative path to source map destination.

@@ -12,12 +12,12 @@ module.exports = function(grunt) {
 
   // Internal lib.
   var comment = require('./lib/comment').init(grunt);
-  var chalk = require('chalk');
+  var chalk = require('chalk').default;
   var sourcemap = require('./lib/sourcemap').init(grunt);
 
-  grunt.registerMultiTask('concat', 'Concatenate files.', function() {
+  async function concatenate(task) {
     // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
+    var options = task.options({
       separator: grunt.util.linefeed,
       banner: '',
       footer: '',
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     }
 
     // Iterate over all src-dest file pairs.
-    this.files.forEach(function(f) {
+    for (const f of task.files) {
       // Initialize source map objects.
       var sourceMapHelper;
       if (sourceMap) {
@@ -70,16 +70,20 @@ module.exports = function(grunt) {
       }
 
       // Concat banner + specified files + footer.
-      var src = banner + f.src.filter(function(filepath) {
+      const files = [];
+      for (const filepath of f.src) {
         // Warn on and remove invalid source files (if nonull was set).
         if (!grunt.file.exists(filepath)) {
           grunt.log.warn('Source file "' + filepath + '" not found.');
-          return false;
+          continue;
         }
-        return true;
-      }).map(function(filepath, i) {
+        files.push(filepath);
+      }
+      const contents = [];
+      for (const [i, filepath] of files.entries()) {
         if (grunt.file.isDir(filepath)) {
-          return;
+          contents.push('');
+          continue;
         }
         // Read file source.
         var src = grunt.file.read(filepath);
@@ -95,27 +99,33 @@ module.exports = function(grunt) {
         }
         // Add the lines of this file to our map.
         if (sourceMapHelper) {
-          src = sourceMapHelper.addlines(src, filepath);
+          src = await sourceMapHelper.addlines(src, filepath);
           if (i < f.src.length - 1) {
             sourceMapHelper.add(options.separator);
           }
         }
-        return src;
-      }).join(options.separator) + footer;
+        contents.push(src);
+      }
+      let output = banner + contents.join(options.separator) + footer;
 
       if (sourceMapHelper) {
         sourceMapHelper.add(footer);
         sourceMapHelper.write();
         // Add sourceMappingURL to the end.
-        src += sourceMapHelper.url();
+        output += sourceMapHelper.url();
       }
 
       // Write the destination file.
-      grunt.file.write(f.dest, src);
+      grunt.file.write(f.dest, output);
 
       // Print a success message.
       grunt.verbose.write('File ' + chalk.cyan(f.dest) + ' created.');
-    });
+    }
+  }
+
+  grunt.registerMultiTask('concat', 'Concatenate files.', function() {
+    const done = this.async();
+    concatenate(this).then(() => done(), done);
   });
 
 };
